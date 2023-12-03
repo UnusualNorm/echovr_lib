@@ -26,6 +26,10 @@ func (config *Config) String() string {
 	return fmt.Sprintf("Config{Type: \"%v\", ID: \"%v\", Extra: %v}", config.Type, config.ID, extraString)
 }
 
+func (config *Config) Verify() bool {
+	return config.Type != "" && config.ID != ""
+}
+
 type SNSConfigSuccessv2 struct {
 	Type   uint64
 	ID     uint64
