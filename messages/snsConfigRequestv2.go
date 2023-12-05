@@ -1,16 +1,12 @@
 package messages
 
 import (
-	"bytes"
-	"encoding/binary"
-	"encoding/json"
 	"fmt"
 
-	"github.com/unusualnorm/echovr_lib/stream"
-	"github.com/unusualnorm/echovr_lib/symbols"
+	echovr "github.com/unusualnorm/echovr_lib"
 )
 
-var SNSConfigRequestv2Symbol uint64 = symbols.GenerateSymbol("SNSConfigRequestv2")
+var SNSConfigRequestv2Symbol uint64 = echovr.GenerateSymbol("SNSConfigRequestv2")
 
 type ConfigInfo struct {
 	Type string `json:"type"`
@@ -30,48 +26,17 @@ type SNSConfigRequestv2 struct {
 	ConfigInfo ConfigInfo
 }
 
-func (message *SNSConfigRequestv2) Symbol() uint64 {
+func (m *SNSConfigRequestv2) Symbol() uint64 {
 	return SNSConfigRequestv2Symbol
 }
 
-func (message *SNSConfigRequestv2) Deserialize(b []byte) error {
-	r := bytes.NewReader(b)
-
-	if err := binary.Read(r, binary.LittleEndian, &message.TypeTail); err != nil {
-		return err
-	}
-
-	configInfoString, err := stream.ReadNullTerminatedString(r)
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal([]byte(configInfoString), &message.ConfigInfo); err != nil {
-		return err
-	}
-
-	return nil
+func (m *SNSConfigRequestv2) Stream(s *echovr.EasyStream) error {
+	return echovr.RunErrorFunctions([]func() error{
+		func() error { return s.StreamByte(&m.TypeTail) },
+		func() error { return s.StreamJson(m.ConfigInfo) },
+	})
 }
 
-func (message *SNSConfigRequestv2) Serialize() ([]byte, error) {
-	b := bytes.NewBuffer([]byte{})
-
-	if err := binary.Write(b, binary.LittleEndian, message.TypeTail); err != nil {
-		return nil, err
-	}
-
-	configInfoString, err := json.Marshal(message.ConfigInfo)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := stream.WriteNullTerminatedString(b, string(configInfoString)); err != nil {
-		return nil, err
-	}
-
-	return b.Bytes(), nil
-}
-
-func (message *SNSConfigRequestv2) String() string {
-	return fmt.Sprintf("SNSConfigRequestv2{TypeTail: 0x%02x, ConfigInfo: %v}", message.TypeTail, message.ConfigInfo.String())
+func (m *SNSConfigRequestv2) String() string {
+	return fmt.Sprintf("SNSConfigRequestv2{TypeTail: 0x%02x, ConfigInfo: %v}", m.TypeTail, m.ConfigInfo.String())
 }

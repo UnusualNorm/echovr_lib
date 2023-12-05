@@ -1,16 +1,13 @@
 package messages
 
 import (
-	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 
-	"github.com/unusualnorm/echovr_lib/stream"
-	"github.com/unusualnorm/echovr_lib/symbols"
+	echovr "github.com/unusualnorm/echovr_lib"
 )
 
-var SNSConfigFailurev2Symbol uint64 = symbols.GenerateSymbol("SNSConfigFailurev2")
+var SNSConfigFailurev2Symbol uint64 = echovr.GenerateSymbol("SNSConfigFailurev2")
 
 type ConfigErrorInfo struct {
 	Type       string `json:"type"`
@@ -33,54 +30,18 @@ type SNSConfigFailurev2 struct {
 	ErrorInfo ConfigErrorInfo
 }
 
-func (message *SNSConfigFailurev2) Symbol() uint64 {
+func (m *SNSConfigFailurev2) Symbol() uint64 {
 	return SNSConfigFailurev2Symbol
 }
 
-func (message *SNSConfigFailurev2) Deserialize(b []byte) error {
-	r := bytes.NewReader(b)
-
-	if err := binary.Read(r, binary.LittleEndian, &message.Type); err != nil {
-		return err
-	}
-	if err := binary.Read(r, binary.LittleEndian, &message.ID); err != nil {
-		return err
-	}
-
-	errorInfoString, err := stream.ReadNullTerminatedString(r)
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal([]byte(errorInfoString), &message.ErrorInfo); err != nil {
-		return err
-	}
-
-	return nil
+func (m *SNSConfigFailurev2) Stream(s *echovr.EasyStream) error {
+	return echovr.RunErrorFunctions([]func() error{
+		func() error { return s.StreamNumber(binary.LittleEndian, &m.Type) },
+		func() error { return s.StreamNumber(binary.LittleEndian, &m.ID) },
+		func() error { return s.StreamJson(m.ErrorInfo) },
+	})
 }
 
-func (message *SNSConfigFailurev2) Serialize() ([]byte, error) {
-	b := bytes.NewBuffer([]byte{})
-
-	if err := binary.Write(b, binary.LittleEndian, message.Type); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(b, binary.LittleEndian, message.ID); err != nil {
-		return nil, err
-	}
-
-	errorInfoString, err := json.Marshal(message.ErrorInfo)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := stream.WriteNullTerminatedString(b, string(errorInfoString)); err != nil {
-		return nil, err
-	}
-
-	return b.Bytes(), nil
-}
-
-func (message *SNSConfigFailurev2) String() string {
-	return fmt.Sprintf("SNSConfigFailurev2{Type: 0x%08x ID: 0x%08x ErrorInfo: %v}", message.Type, message.ID, message.ErrorInfo.String())
+func (m *SNSConfigFailurev2) String() string {
+	return fmt.Sprintf("SNSConfigFailurev2{Type: 0x%08x ID: 0x%08x ErrorInfo: %v}", m.Type, m.ID, m.ErrorInfo.String())
 }

@@ -3,32 +3,23 @@ package messages
 import (
 	"fmt"
 
-	"github.com/unusualnorm/echovr_lib/symbols"
+	echovr "github.com/unusualnorm/echovr_lib"
 )
 
-var STcpConnectionUnrequireEventSymbol uint64 = symbols.GenerateSymbol("STcpConnectionUnrequireEvent")
+var STcpConnectionUnrequireEventSymbol uint64 = echovr.GenerateSymbol("STcpConnectionUnrequireEvent")
 
 type STcpConnectionUnrequireEvent struct {
 	Unused byte
 }
 
-func (message *STcpConnectionUnrequireEvent) Symbol() uint64 {
+func (m *STcpConnectionUnrequireEvent) Symbol() uint64 {
 	return STcpConnectionUnrequireEventSymbol
 }
 
-func (message *STcpConnectionUnrequireEvent) Deserialize(b []byte) error {
-	if len(b) < 1 {
-		return fmt.Errorf("STcpConnectionUnrequireEvent: len(b) < 1")
-	}
-
-	message.Unused = b[0]
-	return nil
+func (m *STcpConnectionUnrequireEvent) Stream(s *echovr.EasyStream) error {
+	return s.StreamByte(&m.Unused)
 }
 
-func (message *STcpConnectionUnrequireEvent) Serialize() ([]byte, error) {
-	return []byte{message.Unused}, nil
-}
-
-func (message *STcpConnectionUnrequireEvent) String() string {
-	return fmt.Sprintf("STcpConnectionUnrequireEvent{Unused: 0x%02x}", message.Unused)
+func (m *STcpConnectionUnrequireEvent) String() string {
+	return fmt.Sprintf("STcpConnectionUnrequireEvent{Unused: 0x%02x}", m.Unused)
 }
