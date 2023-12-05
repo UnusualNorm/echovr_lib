@@ -3,7 +3,6 @@ package messages
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 
 	"github.com/unusualnorm/echovr_lib/stream"
@@ -12,28 +11,10 @@ import (
 
 var SNSConfigSuccessv2Symbol uint64 = symbols.GenerateSymbol("SNSConfigSuccessv2")
 
-type Config struct {
-	Type  string                     `json:"type"`
-	ID    string                     `json:"id"`
-	Extra map[string]json.RawMessage `json:"-"`
-}
-
-func (config *Config) String() string {
-	extraString, err := json.Marshal(config.Extra)
-	if err != nil {
-		return fmt.Sprintf("Config{Type: \"%v\", ID: \"%v\", Extra: ?}", config.Type, config.ID)
-	}
-	return fmt.Sprintf("Config{Type: \"%v\", ID: \"%v\", Extra: %v}", config.Type, config.ID, extraString)
-}
-
-func (config *Config) Verify() bool {
-	return config.Type != "" && config.ID != ""
-}
-
 type SNSConfigSuccessv2 struct {
 	Type   uint64
 	ID     uint64
-	Config Config
+	Config string
 }
 
 func (message *SNSConfigSuccessv2) Symbol() uint64 {
@@ -56,12 +37,8 @@ func (message *SNSConfigSuccessv2) Deserialize(b []byte) error {
 	}
 
 	decompressedR := bytes.NewReader(decompressedBytes)
-	configString, err := stream.ReadNullTerminatedString(decompressedR)
+	message.Config, err = stream.ReadNullTerminatedString(decompressedR)
 	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal([]byte(configString), &message.Config); err != nil {
 		return err
 	}
 
@@ -78,13 +55,8 @@ func (message *SNSConfigSuccessv2) Serialize() ([]byte, error) {
 		return nil, err
 	}
 
-	configString, err := json.Marshal(message.Config)
-	if err != nil {
-		return nil, err
-	}
-
 	compressedB := bytes.NewBuffer([]byte{})
-	if err := stream.WriteNullTerminatedString(compressedB, string(configString)); err != nil {
+	if err := stream.WriteNullTerminatedString(compressedB, message.Config); err != nil {
 		return nil, err
 	}
 
@@ -96,5 +68,5 @@ func (message *SNSConfigSuccessv2) Serialize() ([]byte, error) {
 }
 
 func (message *SNSConfigSuccessv2) String() string {
-	return fmt.Sprintf("Config{Type: %v, ID: %v, Config: %v}", message.Type, message.ID, message.Config.String())
+	return fmt.Sprintf("Config{Type: %v, ID: %v, Config: %v}", message.Type, message.ID, message.Config)
 }
