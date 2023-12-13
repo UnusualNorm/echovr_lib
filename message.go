@@ -8,7 +8,6 @@ import (
 type Message interface {
 	Symbol() uint64
 	Stream(s *EasyStream) error
-	String() string
 }
 
 type Serializable interface {

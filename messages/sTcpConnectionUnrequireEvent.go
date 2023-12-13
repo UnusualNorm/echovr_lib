@@ -1,8 +1,6 @@
 package messages
 
 import (
-	"fmt"
-
 	echovr "github.com/unusualnorm/echovr_lib"
 )
 
@@ -18,8 +16,4 @@ func (m *STcpConnectionUnrequireEvent) Symbol() uint64 {
 
 func (m *STcpConnectionUnrequireEvent) Stream(s *echovr.EasyStream) error {
 	return s.StreamByte(&m.Unused)
-}
-
-func (m *STcpConnectionUnrequireEvent) String() string {
-	return fmt.Sprintf("STcpConnectionUnrequireEvent{Unused: 0x%02x}", m.Unused)
 }

@@ -33,10 +33,6 @@ func (m *SNSConfigRequestv2) Symbol() uint64 {
 func (m *SNSConfigRequestv2) Stream(s *echovr.EasyStream) error {
 	return echovr.RunErrorFunctions([]func() error{
 		func() error { return s.StreamByte(&m.TypeTail) },
-		func() error { return s.StreamJson(m.ConfigInfo) },
+		func() error { return s.StreamNullTerminatedJson(&m.ConfigInfo) },
 	})
-}
-
-func (m *SNSConfigRequestv2) String() string {
-	return fmt.Sprintf("SNSConfigRequestv2{TypeTail: 0x%02x, ConfigInfo: %v}", m.TypeTail, m.ConfigInfo.String())
 }

@@ -54,7 +54,7 @@ func GenerateSymbolSeed() [0x100]uint64 {
 	return seed
 }
 
-var symbolSeed = GenerateSymbolSeed()
+var SymbolSeed = GenerateSymbolSeed()
 
 func GenerateSymbol(name string) uint64 {
 	symbol := uint64(0xffffffffffffffff)
@@ -63,7 +63,7 @@ func GenerateSymbol(name string) uint64 {
 		if name[i] >= '[' || name[i] < 'A' {
 			adjustedChar = name[i]
 		}
-		symbol = uint64(adjustedChar) ^ symbolSeed[symbol>>0x38&0xff] ^ symbol<<8
+		symbol = uint64(adjustedChar) ^ SymbolSeed[symbol>>0x38&0xff] ^ symbol<<8
 	}
 	return symbol
 }

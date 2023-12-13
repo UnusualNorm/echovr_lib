@@ -25,8 +25,8 @@ func (configErrorInfo *ConfigErrorInfo) Verify() bool {
 }
 
 type SNSConfigFailurev2 struct {
-	Type      uint64 // Unknown
-	ID        uint64 // Unknown
+	Type      uint64
+	ID        uint64
 	ErrorInfo ConfigErrorInfo
 }
 
@@ -38,10 +38,6 @@ func (m *SNSConfigFailurev2) Stream(s *echovr.EasyStream) error {
 	return echovr.RunErrorFunctions([]func() error{
 		func() error { return s.StreamNumber(binary.LittleEndian, &m.Type) },
 		func() error { return s.StreamNumber(binary.LittleEndian, &m.ID) },
-		func() error { return s.StreamJson(m.ErrorInfo) },
+		func() error { return s.StreamNullTerminatedJson(&m.ErrorInfo) },
 	})
-}
-
-func (m *SNSConfigFailurev2) String() string {
-	return fmt.Sprintf("SNSConfigFailurev2{Type: 0x%08x ID: 0x%08x ErrorInfo: %v}", m.Type, m.ID, m.ErrorInfo.String())
 }
