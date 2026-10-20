@@ -1,5 +1,5 @@
 module github.com/unusualnorm/echovr_lib
 
-go 1.21.4
+go 1.24
 
-require github.com/klauspost/compress v1.15.2
+require github.com/klauspost/compress v1.18.7
